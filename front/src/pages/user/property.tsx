@@ -394,7 +394,7 @@ export default function Properties() {
     const TypeIcon = propertyTypeConfig[property.propertyType].icon;
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black/30  p-4 z-50" aria-hidden="true">
         <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">

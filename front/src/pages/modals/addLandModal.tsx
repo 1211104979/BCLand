@@ -9,10 +9,7 @@ interface AddLandModalProps {
   onSubmit?: (formData: FormData) => void;
 }
 
-export default function AddLandModal({
-  isOpen,
-  onClose,
-}: AddLandModalProps) {
+export default function AddLandModal({ isOpen, onClose }: AddLandModalProps) {
   // ■ AuthContext からウォレットアドレスとユーザー名を取得
   const { address: walletAddress, userName } = useAuth();
 
@@ -45,12 +42,7 @@ export default function AddLandModal({
 
   // ■ Submit ボタン押下時に listingLand() を呼び出す
   const handleSubmit = async () => {
-    if (
-      !titleNumber.trim() ||
-      !landType ||
-      !priceRM.trim() ||
-      !landFile
-    ) {
+    if (!titleNumber.trim() || !landType || !priceRM.trim() || !landFile) {
       alert("Please fill in（Title, Type, NRIC, Price, Geran File）");
       return;
     }
@@ -82,7 +74,11 @@ export default function AddLandModal({
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={() => isLoading || onClose()}>
+      <Dialog
+        as="div"
+        className="relative z-10"
+        onClose={() => isLoading || onClose()}
+      >
         {/* 背景オーバーレイ */}
         <Transition.Child
           as={Fragment}
@@ -93,7 +89,7 @@ export default function AddLandModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
