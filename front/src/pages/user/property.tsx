@@ -351,7 +351,7 @@ export default function Properties() {
                     </button>
                   )}
               </>
-            ) : (
+            ) : property.status === "ForSale" ? (
               <button
                 onClick={() => {
                   setSelectedBuyLandId(property.id);
@@ -364,7 +364,7 @@ export default function Properties() {
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 Buy
               </button>
-            )}
+            ) : null}
           </td>
         </tr>
       );
@@ -381,7 +381,10 @@ export default function Properties() {
     const TypeIcon = propertyTypeConfig[property.propertyType].icon;
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/30  p-4 z-50" aria-hidden="true">
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black/30  p-4 z-50"
+        aria-hidden="true"
+      >
         <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div className="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -537,6 +540,7 @@ export default function Properties() {
               Government of Malaysia - Digital Land Registry
             </p>
           </div>
+        {address && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -544,6 +548,7 @@ export default function Properties() {
             <Landmark className="w-4 h-4 mr-2" />
             Register Your Property
           </button>
+        )}
         </div>
         <AddLandModal
           isOpen={isModalOpen}
