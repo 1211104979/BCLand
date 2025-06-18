@@ -11,7 +11,7 @@ contract LandRegistry is ERC721URIStorage, Ownable {
     // Roles for access control
     enum Role { None, User, Staff }
     // Status of each land parcel
-    enum LandStatus { Active, ForSale, Pending_Approval, Sold, Disputed }
+    enum LandStatus { Active, ForSale, Pending_Approval, Approved }
 
     struct Land {
         uint256 landId;
@@ -170,8 +170,8 @@ contract LandRegistry is ERC721URIStorage, Ownable {
         // _setTokenURI(landId, newMetadataCID);
 
         // Set status to Sold
-        lands[landId].status = LandStatus.Sold;
-        emit LandStatusUpdated(landId, LandStatus.Sold);
+        lands[landId].status = LandStatus.Approved;
+        emit LandStatusUpdated(landId, LandStatus.Approved);
 
         // Capture price and reset sale state
         uint256 price = landPrices[landId];

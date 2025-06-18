@@ -45,7 +45,7 @@ interface Property {
   propertyType: "Residential" | "Commercial" | "Agricultural" | "Industrial";
   registrationDate: string;
   lastTransfer: string;
-  status: "Active" | "Disputed" | "ForSale" | "Sold" | "PendingApproval";
+  status: "Active" | "ForSale" | "Approved" | "PendingApproval";
   blockchainHash: string;
   surveyNumber: string;
   marketValue: string;
@@ -59,7 +59,7 @@ const statusConfig = {
     icon: CheckCircle,
     description: "Property verified and registered on blockchain",
   },
-  Disputed: {
+  PendingApproval: {
     color: "bg-yellow-100 text-yellow-800 border-yellow-200",
     icon: Clock,
     description: "Awaiting verification and blockchain registration",
@@ -69,12 +69,7 @@ const statusConfig = {
     icon: Eye,
     description: "Under review by land registration authorities",
   },
-  Sold: {
-    color: "bg-red-100 text-red-800 border-red-200",
-    icon: AlertTriangle,
-    description: "Property ownership or boundaries under dispute",
-  },
-  PendingApproval: {
+  Approved: {
     color: "bg-red-100 text-red-800 border-red-200",
     icon: AlertTriangle,
     description: "Property ownership or boundaries under dispute",
@@ -129,8 +124,7 @@ export default function Properties() {
         0: "Active",
         1: "ForSale",
         2: "PendingApproval",
-        3: "Sold",
-        4: "Disputed",
+        3: "Approved",
       };
 
       const merged: Property[] = fetched.map((landData) => ({
@@ -328,7 +322,7 @@ export default function Properties() {
                 {saleInfo[property.id]?.pendingBuyer &&
                   saleInfo[property.id].pendingBuyer !==
                     "0x0000000000000000000000000000000000000000" &&
-                  property.status !== "Sold" && (
+                  property.status !== "Approved" && (
                     <button
                       className="text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded inline-flex items-center"
                       onClick={async () => {
@@ -369,13 +363,6 @@ export default function Properties() {
               >
                 <ShoppingCart className="w-4 h-4 mr-1" />
                 Buy
-              </button>
-            )}
-
-            {property.status === "Disputed" && (
-              <button className="text-green-600 hover:text-green-900 inline-flex items-center">
-                <Shield className="w-4 h-4 mr-1" />
-                Verify
               </button>
             )}
           </td>

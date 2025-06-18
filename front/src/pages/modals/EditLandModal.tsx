@@ -15,7 +15,7 @@ interface Property {
   propertyType: "Residential" | "Commercial" | "Agricultural" | "Industrial";
   registrationDate: string;
   lastTransfer: string;
-  status: "Active" | "Disputed" | "ForSale" | "Sold" | "PendingApproval";
+  status: "Active" | "ForSale" | "Approved" | "PendingApproval";
   blockchainHash: string;
   surveyNumber: string;
   marketValue: string;
@@ -36,8 +36,7 @@ const statusToEnum = (status: Property["status"]): number => {
     Active: 0,
     ForSale: 1,
     PendingApproval: 2,
-    Sold: 3,
-    Disputed: 4,
+    Approved: 3,
   };
   return map[status];
 };
