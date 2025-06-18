@@ -105,6 +105,25 @@ contract LandRegistry is ERC721URIStorage, Ownable {
         emit LandStatusUpdated(landId, newStatus);
     }
 
+    function updateLandPrice(uint256 landId, uint256 newPriceWei) external onlyRegisteredUser {
+        require(_existsToken(landId), "Land does not exist");
+        require(ownerOf(landId) == msg.sender, "Only land owner can update price");
+        landPrices[landId] = newPriceWei;
+        emit LandListed(landId, newPriceWei);
+    }
+
+    /// @notice Update both land status and price in one transaction
+    function updateLandDetails(uint256 landId, LandStatus newStatus, uint256 newPriceWei) external onlyRegisteredUser {
+        require(_existsToken(landId), "Land not found");
+        require(ownerOf(landId) == msg.sender, "Only land owner can update");
+
+        lands[landId].status = newStatus;
+        landPrices[landId] = newPriceWei;
+
+        emit LandStatusUpdated(landId, newStatus);
+        emit LandListed(landId, newPriceWei);
+    }
+
     /// @notice Buyer requests to purchase by sending exact ETH
     function requestToBuy(uint256 landId) external payable onlyRegisteredUser {
         require(lands[landId].status == LandStatus.ForSale, "Land not for sale");

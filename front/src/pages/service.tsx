@@ -1,36 +1,6 @@
-import { Users, GraduationCap, Code, Blocks, Globe, Award, BookOpen, Lightbulb } from 'lucide-react';
+import { Code, Blocks, Globe, Award } from 'lucide-react';
 
 export default function About() {
-  const students = [
-    {
-      name: "Ahmad Haziq bin Rahman",
-      id: "1201203456",
-      role: "Lead Developer & Smart Contract Architect",
-      specialty: "Blockchain Development, Solidity Programming",
-      avatar: "AH"
-    },
-    {
-      name: "Lim Wei Jie",
-      id: "1201203457", 
-      role: "Frontend Developer & UI/UX Designer",
-      specialty: "React.js, TypeScript, User Interface Design",
-      avatar: "LW"
-    },
-    {
-      name: "Priya Devi d/o Suresh",
-      id: "1201203458",
-      role: "Backend Developer & Database Architect", 
-      specialty: "Node.js, Database Design, API Development",
-      avatar: "PD"
-    },
-    {
-      name: "Muhammad Faiz bin Ismail",
-      id: "1201203459",
-      role: "System Integration & Testing Lead",
-      specialty: "System Testing, DevOps, Quality Assurance",
-      avatar: "MF"
-    }
-  ];
 
   const technologies = [
     { name: "React.js", description: "Frontend user interface framework" },

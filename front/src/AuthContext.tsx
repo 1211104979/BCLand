@@ -53,12 +53,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUserName(fullName || null)
         // role
         setUserRole(meta.role ?? null)
-        // nric
-        setUserNric(meta.icNumber ?? null)
       } catch {
         setUserName(null)
         setUserRole(null)
-        setUserNric(null)
       }
     }
 
@@ -73,11 +70,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const fullName = `${meta.firstName ?? ''} ${meta.lastName ?? ''}`.trim()
       setUserName(fullName || null)
       setUserRole(meta.role ?? null)
-      setUserNric(meta.nric ?? null)
     } catch {
       setUserName(null)
       setUserRole(null)
-      setUserNric(null)
     }
   }
 

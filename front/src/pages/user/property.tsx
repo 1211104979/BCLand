@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import AddLandModal from "../modals/addLandModal";
 import BuyLandModal from "../modals/BuyLandModal";
+import EditLandModal from "../modals/EditLandModal";
 
 // ethers v6 の BrowserProvider と Contract 型をインポート
 import { Contract, BrowserProvider } from "ethers";
@@ -24,7 +25,7 @@ import {
   requestToBuyLand,
   approvePurchase,
   getSaleInfo,
-  handleViewGrant
+  handleViewGrant,
 } from "../../lib/contracts";
 // ABI ファイルと AuthContext もインポート
 import LandRegistryABI from "../../../../block/artifacts/contracts/LandRegistry.sol/LandRegistry.json";
@@ -94,11 +95,8 @@ export default function Properties() {
     Record<string, { priceWei: bigint; pendingBuyer: string }>
   >({});
 
-
   const [isGrantOpen, setIsGrantOpen] = useState(false);
   const [grantUrl, setGrantUrl] = useState<string>("");
-
-
 
   // 全土地情報を保持する state
   const [properties, setProperties] = useState<Property[]>([]);
@@ -233,6 +231,18 @@ export default function Properties() {
     setSelectedProperty(property);
   };
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editProperty, setEditProperty] = useState<Property | null>(null);
+  const [newStatus, setNewStatus] = useState<Property["status"]>("Active");
+  const [newPrice, setNewPrice] = useState<string>("");
+
+  const handleEditProperty = (property: Property) => {
+    setEditProperty(property);
+    setNewStatus(property.status);
+    setNewPrice(property.marketValue);
+    setIsEditModalOpen(true);
+  };
+
   const PropertyModal = ({
     property,
     onClose,
@@ -358,25 +368,24 @@ export default function Properties() {
               </div>
             )}
 
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            onClick={async () => {
-              try {
-                // call your imported helper
-                const url = await handleViewGrant(property.metadataCID);
-                // store the blob‐URL in state
-                setGrantUrl(url);
-                // show the PDF overlay
-                setIsGrantOpen(true);
-              } catch (err) {
-                console.error("failed to load grant PDF:", err);
-                alert("Could not load the land grant PDF.");
-              }
-            }}
-          >
-            View Land Grant
-          </button>
-
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              onClick={async () => {
+                try {
+                  // call your imported helper
+                  const url = await handleViewGrant(property.metadataCID);
+                  // store the blob‐URL in state
+                  setGrantUrl(url);
+                  // show the PDF overlay
+                  setIsGrantOpen(true);
+                } catch (err) {
+                  console.error("failed to load grant PDF:", err);
+                  alert("Could not load the land grant PDF.");
+                }
+              }}
+            >
+              View Land Grant
+            </button>
           </div>
         </div>
       </div>
@@ -558,7 +567,10 @@ export default function Properties() {
                       property.ownerAddress.toLowerCase() ? (
                         <>
                           {/* Edit button */}
-                          <button className="text-indigo-600 hover:text-indigo-900 inline-flex items-center">
+                          <button
+                            className="text-indigo-600 hover:text-indigo-900 inline-flex items-center"
+                            onClick={() => handleEditProperty(property)}
+                          >
                             <Edit3 className="w-4 h-4 mr-1" />
                             Edit
                           </button>
@@ -669,6 +681,13 @@ export default function Properties() {
           // 5) close the modal
           setIsBuyModalOpen(false);
         }}
+      />
+      <EditLandModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        property={editProperty}
+        contract={contract}
+        reloadLands={loadAllLands}
       />
     </div>
   );

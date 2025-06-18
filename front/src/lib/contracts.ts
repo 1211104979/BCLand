@@ -1,5 +1,5 @@
 // ========== ここから：GovLand/src/lib/contracts.ts ==========
-import { ethers, Contract } from "ethers";
+import { ethers, Contract, formatEther } from "ethers";
 import lighthouse from "@lighthouse-web3/sdk";     // ← 追加
 import { getWeb3ProviderAndSigner } from "./provider";
 import LandRegistryABI from "../../../block/artifacts/contracts/LandRegistry.sol/LandRegistry.json";
@@ -303,7 +303,6 @@ export async function listingLand(
     titleNumber,
     landType,
     username,
-    priceRM,
     area: "100 m2",
     geranCid,
     timestamp: new Date().toISOString(),
@@ -431,16 +430,28 @@ export async function getYourLands(
   return Promise.all(fetchPromises);
 }
 
+export async function fetchLandPrice(landId: number): Promise<string> {
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum); // MetaMask injected
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, LandRegistryABI.abi, signer);
+
+    const price: bigint = await contract.landPrices(landId);
+    return ethers.formatEther(price); // convert from wei to ETH string
+  } catch (error) {
+    console.error("Error fetching land price:", error);
+    return "0";
+  }
+}
+
 export async function fetchAllLands(
   contract: Contract
 ): Promise<YourLand[]> {
-  // 1) すべての landId を取得
   const landIds: bigint[] = await contract.getAllLandIds();
 
   const fetchPromises = landIds.map(async (idBigint) => {
     const id = idBigint.toString();
 
-    // getLand は (Land, owner) を返す想定
     const [
       landOnchain,
       ownerAddr,
@@ -455,13 +466,17 @@ export async function fetchAllLands(
 
     const { status: statusCode, metadataCID } = landOnchain;
 
-    // IPFS metadata fetch
+    // Fetch land price from contract
+    const priceWei: bigint = await contract.landPrices(idBigint);
+    const ethValue = parseFloat(formatEther(priceWei)); // ETH value as number
+    const PriceRM = ethValue * RM_PER_ETH;               // convert to RM
+    const priceRM = PriceRM.toFixed(2);                  // string with 2 decimals
+    // IPFS metadata fetch (excluding priceRM)
     let jsonMeta: {
       titleNumber: string;
       landType: string;
       nric: string;
       username: string;
-      priceRM: string;
       area: string;
       geranCid: string;
       timestamp: string;
@@ -483,13 +498,13 @@ export async function fetchAllLands(
         titleNumber: "",
         landType: "",
         username: "",
-        priceRM: "",
         area: "",
         geranCid: "",
         geranUrl: "",
         timestamp: "",
         owner: ownerAddr,
         metadataCID,
+        priceRM,
       };
     }
 
@@ -497,7 +512,6 @@ export async function fetchAllLands(
       titleNumber,
       landType,
       username,
-      priceRM,
       area,
       geranCid,
       timestamp,
@@ -509,18 +523,19 @@ export async function fetchAllLands(
       titleNumber,
       landType,
       username,
-      priceRM,
       area,
       geranCid,
       geranUrl: `https://gateway.lighthouse.storage/ipfs/${geranCid}`,
       timestamp,
       owner: ownerAddr,
       metadataCID,
+      priceRM,
     };
   });
 
   return Promise.all(fetchPromises);
 }
+
 
 /**
  * 1) Owner lists a land for sale at `priceRM`
@@ -646,5 +661,4 @@ export async function handleViewGrant(cid: string) {
 
   return url;
 }
-
 
