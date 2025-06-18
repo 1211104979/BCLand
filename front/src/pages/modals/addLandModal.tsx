@@ -64,6 +64,7 @@ export default function AddLandModal({ isOpen, onClose }: AddLandModalProps) {
       await tx.wait();
       alert("✅ Land Successfully registered");
       onClose();
+      window.location.reload(); 
     } catch (err: any) {
       console.error("listingLand エラー:", err);
       alert("❌ AnError Occur During Registration: " + (err.message || err));
