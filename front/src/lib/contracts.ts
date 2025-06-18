@@ -597,12 +597,18 @@ export async function approvePurchase(
   landId: string,
   buyerAddress: string,
   privateCID: string
-): Promise<ethers.TransactionResponse> {
+): Promise<void> {
   const ws = await connectAccount();
   if (!ws) throw new Error("MetaMask not connected");
-    const { contract, userAddress, signer } = ws;
+  const { contract, userAddress, signer } = ws;
 
+  // First: execute the on-chain transfer
+  const tx = await contract.transferLandOwnership(landId, buyerAddress);
+  await tx.wait();
+
+  // Then: transfer encrypted access off-chain via Lighthouse
   const signature = await signAuthMessage(userAddress, signer);
+
   const transferNFT: any = await kavach.transferOwnership(
     userAddress,
     privateCID,
@@ -610,10 +616,16 @@ export async function approvePurchase(
     signature,
     true
   );
-  if (transferNFT.error) throw new Error(transferNFT.error);
 
-
-  return await contract.transferLandOwnership(landId, buyerAddress);
+  if (transferNFT?.error) {
+    console.error("Lighthouse error response:", transferNFT.error);
+    // Warning: at this point, buyer owns land but can't access CID — handle fallback
+    throw new Error(
+      typeof transferNFT.error === "object"
+        ? JSON.stringify(transferNFT.error)
+        : transferNFT.error
+    );
+  }
 }
 
 /**

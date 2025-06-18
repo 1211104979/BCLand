@@ -588,14 +588,25 @@ export default function Properties() {
                                   const buyer =
                                     saleInfo[property.id].pendingBuyer;
                                   const metadataCID =
-                                    property.metadataCID || ""; // Replace with correct CID
-                                  const tx = await approvePurchase(
-                                    property.id,
-                                    buyer,
-                                    metadataCID
-                                  );
-                                  await tx.wait();
-                                  window.location.reload();
+                                    property.metadataCID || "";
+
+                                  try {
+                                    await approvePurchase(
+                                      property.id,
+                                      buyer,
+                                      metadataCID
+                                    );
+                                    window.location.reload();
+                                  } catch (err) {
+                                    console.error("Approval failed:", err);
+                                    const errorMessage =
+                                      err instanceof Error
+                                        ? err.message
+                                        : JSON.stringify(err);
+                                    alert(
+                                      "Failed to approve sale: " + errorMessage
+                                    );
+                                  }
                                 }}
                               >
                                 <Shield className="w-4 h-4 mr-1" />
