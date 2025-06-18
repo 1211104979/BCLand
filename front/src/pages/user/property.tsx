@@ -242,6 +242,146 @@ export default function Properties() {
     setNewPrice(property.marketValue);
     setIsEditModalOpen(true);
   };
+  const renderTableRows = (propertiesToRender: Property[]) =>
+    propertiesToRender.map((property) => {
+      const StatusIcon = statusConfig[property.status].icon;
+      const TypeIcon = propertyTypeConfig[property.propertyType].icon;
+
+      return (
+        <tr key={property.id} className="hover:bg-gray-50">
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="flex items-center">
+              <div
+                className={`p-2 rounded-full ${
+                  propertyTypeConfig[property.propertyType].color
+                } bg-opacity-10`}
+              >
+                <TypeIcon
+                  className={`h-5 w-5 ${
+                    propertyTypeConfig[property.propertyType].color
+                  }`}
+                />
+              </div>
+              <div className="ml-4">
+                <div className="text-sm font-medium text-gray-900">
+                  {property.id || "—"}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {property.propertyType}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <td className="px-6 py-4">
+            <div className="text-sm font-medium text-gray-900">
+              {property.owner || "—"}
+            </div>
+            <div className="text-sm text-gray-500 max-w-xs truncate">
+              {property.ownerAddress || "—"}
+            </div>
+          </td>
+
+          <td className="px-6 py-4 whitespace-nowrap">
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                statusConfig[property.status].color
+              }`}
+            >
+              <StatusIcon className="w-3 h-3 mr-1" />
+              {property.status}
+            </span>
+          </td>
+
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm font-medium text-gray-900">
+              {property.marketValue || "—"}
+            </div>
+            <div className="text-sm text-gray-500">
+              {property.registrationDate
+                ? new Date(property.registrationDate).toLocaleDateString(
+                    "en-MY"
+                  )
+                : "—"}
+            </div>
+          </td>
+
+          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+            <button
+              onClick={() => handleViewProperty(property)}
+              className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+            >
+              <Eye className="w-4 h-4 mr-1" />
+              View
+            </button>
+
+            {address?.toLowerCase() === property.ownerAddress.toLowerCase() ? (
+              <>
+                <button
+                  className="text-indigo-600 hover:text-indigo-900 inline-flex items-center"
+                  onClick={() => handleEditProperty(property)}
+                >
+                  <Edit3 className="w-4 h-4 mr-1" />
+                  Edit
+                </button>
+
+                {saleInfo[property.id]?.pendingBuyer &&
+                  saleInfo[property.id].pendingBuyer !==
+                    "0x0000000000000000000000000000000000000000" &&
+                  property.status !== "Sold" && (
+                    <button
+                      className="text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded inline-flex items-center"
+                      onClick={async () => {
+                        const buyer = saleInfo[property.id].pendingBuyer;
+                        const metadataCID = property.metadataCID || "";
+
+                        try {
+                          await approvePurchase(
+                            property.id,
+                            buyer,
+                            metadataCID
+                          );
+                          window.location.reload();
+                        } catch (err) {
+                          console.error("Approval failed:", err);
+                          const errorMessage =
+                            err instanceof Error
+                              ? err.message
+                              : JSON.stringify(err);
+                          alert("Failed to approve sale: " + errorMessage);
+                        }
+                      }}
+                    >
+                      <Shield className="w-4 h-4 mr-1" />
+                      Approve
+                    </button>
+                  )}
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setSelectedBuyLandId(property.id);
+                  setSelectedBuyPrice(property.marketValue);
+                  setIsBuyModalOpen(true);
+                  setSelectedProperty(null);
+                }}
+                className="text-green-600 hover:text-green-900 inline-flex items-center"
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Buy
+              </button>
+            )}
+
+            {property.status === "Disputed" && (
+              <button className="text-green-600 hover:text-green-900 inline-flex items-center">
+                <Shield className="w-4 h-4 mr-1" />
+                Verify
+              </button>
+            )}
+          </td>
+        </tr>
+      );
+    });
 
   const PropertyModal = ({
     property,
@@ -340,14 +480,14 @@ export default function Properties() {
             </div>
 
             {/* Blockchain Hash */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            {/* <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-600 mb-2">
                 Blockchain Information
               </h3>
               <p className="text-xs font-mono text-gray-800 break-all">
                 {property.blockchainHash || "—"}
               </p>
-            </div>
+            </div> */}
 
             {/* Encumbrances */}
             {property.encumbrances.length > 0 && (
@@ -368,30 +508,35 @@ export default function Properties() {
               </div>
             )}
 
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-              onClick={async () => {
-                try {
-                  // call your imported helper
-                  const url = await handleViewGrant(property.metadataCID);
-                  // store the blob‐URL in state
-                  setGrantUrl(url);
-                  // show the PDF overlay
-                  setIsGrantOpen(true);
-                } catch (err) {
-                  console.error("failed to load grant PDF:", err);
-                  alert("Could not load the land grant PDF.");
-                }
-              }}
-            >
-              View Land Grant
-            </button>
+            {address?.toLowerCase() === property.ownerAddress.toLowerCase() && (
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                onClick={async () => {
+                  try {
+                    const url = await handleViewGrant(property.metadataCID);
+                    setGrantUrl(url);
+                    setIsGrantOpen(true);
+                  } catch (err) {
+                    console.error("failed to load grant PDF:", err);
+                    alert("Could not load the land grant PDF.");
+                  }
+                }}
+              >
+                View Land Grant
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
   };
+  const ownedProperties = filteredProperties.filter(
+    (property) => address?.toLowerCase() === property.ownerAddress.toLowerCase()
+  );
 
+  const availableProperties = filteredProperties.filter(
+    (property) => address?.toLowerCase() !== property.ownerAddress.toLowerCase()
+  );
   return (
     <div className="max-w-[90%] mx-auto px-4 py-8">
       {/* Header */}
@@ -489,156 +634,33 @@ export default function Properties() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProperties.map((property) => {
-                console.log("ROw for ID ", property.id, saleInfo[property.id]);
-
-                const StatusIcon = statusConfig[property.status].icon;
-                const TypeIcon = propertyTypeConfig[property.propertyType].icon;
-
-                return (
-                  <tr key={property.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div
-                          className={`p-2 rounded-full ${
-                            propertyTypeConfig[property.propertyType].color
-                          } bg-opacity-10`}
-                        >
-                          <TypeIcon
-                            className={`h-5 w-5 ${
-                              propertyTypeConfig[property.propertyType].color
-                            }`}
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {property.id || "—"}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {property.propertyType}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {property.owner || "—"}
-                      </div>
-                      <div className="text-sm text-gray-500 max-w-xs truncate">
-                        {property.ownerAddress || "—"}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                          statusConfig[property.status].color
-                        }`}
-                      >
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {property.status}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {property.marketValue || "—"}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {property.registrationDate
-                          ? new Date(
-                              property.registrationDate
-                            ).toLocaleDateString("en-MY")
-                          : "—"}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleViewProperty(property)}
-                        className="text-blue-600 hover:text-blue-900 inline-flex items-center"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </button>
-
-                      {address?.toLowerCase() ===
-                      property.ownerAddress.toLowerCase() ? (
-                        <>
-                          {/* Edit button */}
-                          <button
-                            className="text-indigo-600 hover:text-indigo-900 inline-flex items-center"
-                            onClick={() => handleEditProperty(property)}
-                          >
-                            <Edit3 className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-
-                          {/* Approve button, shown if there’s a pending buyer */}
-                          {address?.toLowerCase() ===
-                            property.ownerAddress.toLowerCase() &&
-                            saleInfo[property.id]?.pendingBuyer &&
-                            saleInfo[property.id].pendingBuyer !==
-                              "0x0000000000000000000000000000000000000000" &&
-                            property.status !== "Sold" && (
-                              <button
-                                className="text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded inline-flex items-center"
-                                onClick={async () => {
-                                  const buyer =
-                                    saleInfo[property.id].pendingBuyer;
-                                  const metadataCID =
-                                    property.metadataCID || "";
-
-                                  try {
-                                    await approvePurchase(
-                                      property.id,
-                                      buyer,
-                                      metadataCID
-                                    );
-                                    window.location.reload();
-                                  } catch (err) {
-                                    console.error("Approval failed:", err);
-                                    const errorMessage =
-                                      err instanceof Error
-                                        ? err.message
-                                        : JSON.stringify(err);
-                                    alert(
-                                      "Failed to approve sale: " + errorMessage
-                                    );
-                                  }
-                                }}
-                              >
-                                <Shield className="w-4 h-4 mr-1" />
-                                Approve
-                              </button>
-                            )}
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setSelectedBuyLandId(property.id);
-                            setSelectedBuyPrice(property.marketValue);
-                            setIsBuyModalOpen(true);
-                            setSelectedProperty(null);
-                          }}
-                          className="text-green-600 hover:text-green-900 inline-flex items-center"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-1" />
-                          Buy
-                        </button>
-                      )}
-
-                      {property.status === "Disputed" && (
-                        <button className="text-green-600 hover:text-green-900 inline-flex items-center">
-                          <Shield className="w-4 h-4 mr-1" />
-                          Verify
-                        </button>
-                      )}
+              {ownedProperties.length > 0 && (
+                <>
+                  <tr className="bg-gray-100">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-3 text-sm font-semibold text-gray-700"
+                    >
+                      My Lands
                     </td>
                   </tr>
-                );
-              })}
+                  {renderTableRows(ownedProperties)}
+                </>
+              )}
+
+              {availableProperties.length > 0 && (
+                <>
+                  <tr className="bg-gray-100">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-3 text-sm font-semibold text-gray-700"
+                    >
+                      Marketplace Listings
+                    </td>
+                  </tr>
+                  {renderTableRows(availableProperties)}
+                </>
+              )}
             </tbody>
           </table>
         </div>
