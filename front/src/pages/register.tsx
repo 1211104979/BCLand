@@ -375,7 +375,7 @@ const RegistrationPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.firstName ? "border-red-500" : "border-gray-300"
                   }`}
-                  placeholder="John"
+                  placeholder="Ali"
                 />
                 {errors.firstName && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -397,7 +397,7 @@ const RegistrationPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.lastName ? "border-red-500" : "border-gray-300"
                   }`}
-                  placeholder="Doe"
+                  placeholder="Abu"
                 />
                 {errors.lastName && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -419,7 +419,7 @@ const RegistrationPage: React.FC = () => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     errors.phoneNumber ? "border-red-500" : "border-gray-300"
                   }`}
-                  placeholder="(555) 123-4567"
+                  placeholder="01122334455"
                 />
                 {errors.phoneNumber && (
                   <p className="mt-1 text-sm text-red-600 flex items-center">

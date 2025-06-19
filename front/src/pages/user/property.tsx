@@ -62,17 +62,17 @@ const statusConfig = {
   PendingApproval: {
     color: "bg-yellow-100 text-yellow-800 border-yellow-200",
     icon: Clock,
-    description: "Awaiting verification and blockchain registration",
+    description: "Awaiting verification from owner for transaction approval",
   },
   ForSale: {
     color: "bg-blue-100 text-blue-800 border-blue-200",
     icon: Eye,
-    description: "Under review by land registration authorities",
+    description: "Proeperty For Salle!",
   },
   Approved: {
-    color: "bg-red-100 text-red-800 border-red-200",
+    color: "bg-green-100 text-green-800 border-green-200",
     icon: AlertTriangle,
-    description: "Property ownership or boundaries under dispute",
+    description: "Property ownership approved",
   },
 };
 
@@ -269,7 +269,7 @@ export default function Properties() {
 
           <td className="px-6 py-4">
             <div className="text-sm font-medium text-gray-900">
-              {property.owner || "—"}
+              {property.ownerAddress || "—"}
             </div>
             <div className="text-sm text-gray-500 max-w-xs truncate">
               {property.ownerAddress || "—"}
@@ -433,7 +433,6 @@ export default function Properties() {
                   <label className="block text-sm font-medium text-gray-600 mb-1">
                     Owner
                   </label>
-                  <p className="text-gray-800">{property.owner || "—"}</p>
                   <p className="text-sm text-gray-600">
                     {property.ownerAddress || "—"}
                   </p>
@@ -579,10 +578,10 @@ export default function Properties() {
               onChange={(e) => setStatusFilter(e.target.value as any)}
             >
               <option value="All">All Status</option>
-              <option value="Verified">Verified</option>
-              <option value="Pending">Pending</option>
-              <option value="Under Review">Under Review</option>
-              <option value="Disputed">Disputed</option>
+              <option value="Verified">Active</option>
+              <option value="Pending">ForSale</option>
+              <option value="Under Review"></option>
+              <option value="Disputed">PendingApproval</option>
               <option value="Transferred">Transferred</option>
             </select>
           </div>
